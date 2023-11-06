@@ -34,7 +34,7 @@ int main() {
         return -1;
     }
 
-    GLFWwindow* window = glfwCreateWindow(640, 480, "practice triangle in c", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(640, 480, "Particle Sim", NULL, NULL);
  	glfwMakeContextCurrent(window);
 	if (!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress)) {
 		fprintf(stderr, "Failed to initialize glad\n");
@@ -107,11 +107,18 @@ int main() {
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    int iResolutionLoc = glGetUniformLocation(program, "iResolution");
 
     while (!glfwWindowShouldClose(window)) {
-        glClear(GL_COLOR_BUFFER_BIT);
+        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         glUseProgram(program);
+        glUniform3f(iResolutionLoc, 640.0, 480.0, 1.0);
+
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, sizeof(indices)/sizeof(unsigned int), GL_UNSIGNED_INT, 0); 
 
