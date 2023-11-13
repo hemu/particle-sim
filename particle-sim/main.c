@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <cglm/cglm.h> 
 
 #define MAX_SHADER_SOURCE_SIZE 5000
 
@@ -71,7 +72,6 @@ int main() {
     glAttachShader(program, frag_shader);
     glLinkProgram(program);
 
-
     float vertices[12] = {
         -0.5, 0.5, 0.0,
         0.5, 0.5, 0.0,
@@ -112,12 +112,43 @@ int main() {
 
     int iResolutionLoc = glGetUniformLocation(program, "iResolution");
 
+    // -------- particles ----------
+    int modelLoc = glGetUniformLocation(program, "model");
+    int viewLoc = glGetUniformLocation(program, "view");
+    int projectionLoc = glGetUniformLocation(program, "projection");
+
+    mat4 model = GLM_MAT4_IDENTITY_INIT;
+    mat4 view = GLM_MAT4_IDENTITY_INIT;
+    mat4 projection = GLM_MAT4_IDENTITY_INIT;
+
+    vec3 pos = {0.0, 0.0, 0.0};
+    vec3 scale = {1.0, 1.0, 1.0};
+
+    // model
+    glm_scale(model, scale);
+    glm_translate(model, pos);
+
+    // view
+    // TODO: extract out to Camera struct
+    vec3 camera_pos = { 0.0f, 0.0f, 10.0f};
+    vec3 camera_up = { 0.0f, 1.0f, 0.0f};
+    vec3 camera_front = { 0.0f, 0.0f, -1.0f};
+    vec3 lookat_center;
+    glm_vec3_add(camera_pos, camera_front, lookat_center);
+    glm_lookat(camera_pos, lookat_center, camera_up, view);
+
+    // projection
+    glm_perspective(glm_rad(100.0f), 1280.0f / 720.0f, 0.1f, 100.0f, projection);
+
+    glUseProgram(program);
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, (float *) model);
+    glUniformMatrix4fv(viewLoc, 1, GL_FALSE, (float *) view);
+    glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, (float *) projection);
+    glUniform3f(iResolutionLoc, 640.0, 480.0, 1.0);
+
     while (!glfwWindowShouldClose(window)) {
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        glUseProgram(program);
-        glUniform3f(iResolutionLoc, 640.0, 480.0, 1.0);
 
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, sizeof(indices)/sizeof(unsigned int), GL_UNSIGNED_INT, 0); 

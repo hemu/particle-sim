@@ -16,11 +16,10 @@ vec4 circle(vec2 uv, vec2 pos, float rad, vec3 color) {
 	return vec4(color, 1.0 - t);
 }
 
-
 void main() {
 	vec2 uv = gl_FragCoord.xy;
 	vec2 center = iResolution.xy * 0.5;
-	float radius = 0.25 * iResolution.y;
+	float radius = 0.01 * iResolution.y;
 	
 	vec3 circleColor = rgb(225.0, 95.0, 60.0);
 
