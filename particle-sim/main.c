@@ -3,6 +3,8 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <cglm/cglm.h> 
+#include "particle.h"
+#include <windows.h>
 
 #define MAX_SHADER_SOURCE_SIZE 5000
 
@@ -28,6 +30,10 @@ char* LoadShader(const char* filepath, char* contents, size_t max_content_size) 
     contents[read_count] = '\0';
 }
 
+void StepVerlet(float delta, Particle *p) {
+    p->pos[0] += 2 * delta;
+}
+
 int main() {
     if (glfwInit() != GLFW_TRUE)
     {
@@ -45,7 +51,7 @@ int main() {
     char vert_shader_src[MAX_SHADER_SOURCE_SIZE];
     char frag_shader_src[MAX_SHADER_SOURCE_SIZE];
     LoadShader("vert.glsl", vert_shader_src, MAX_SHADER_SOURCE_SIZE);
-    LoadShader("frag.glsl", frag_shader_src, MAX_SHADER_SOURCE_SIZE);
+    LoadShader("frag2.glsl", frag_shader_src, MAX_SHADER_SOURCE_SIZE);
 
     GLuint vert_shader = glCreateShader(GL_VERTEX_SHADER);
     if (!vert_shader) {
@@ -117,16 +123,9 @@ int main() {
     int viewLoc = glGetUniformLocation(program, "view");
     int projectionLoc = glGetUniformLocation(program, "projection");
 
-    mat4 model = GLM_MAT4_IDENTITY_INIT;
     mat4 view = GLM_MAT4_IDENTITY_INIT;
     mat4 projection = GLM_MAT4_IDENTITY_INIT;
 
-    vec3 pos = {0.0, 0.0, 0.0};
-    vec3 scale = {1.0, 1.0, 1.0};
-
-    // model
-    glm_scale(model, scale);
-    glm_translate(model, pos);
 
     // view
     // TODO: extract out to Camera struct
@@ -141,12 +140,38 @@ int main() {
     glm_perspective(glm_rad(100.0f), 1280.0f / 720.0f, 0.1f, 100.0f, projection);
 
     glUseProgram(program);
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, (float *) model);
     glUniformMatrix4fv(viewLoc, 1, GL_FALSE, (float *) view);
     glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, (float *) projection);
     glUniform3f(iResolutionLoc, 640.0, 480.0, 1.0);
 
+    // model pos
+    Particle p = {.pos = {0.0, 0.0}, .pos_prev = {0.0, 0.0}, .vel = {0.0, 0.0} };
+    vec3 pos = { 0.0, 0.0, 0.0 };
+
+    LARGE_INTEGER frequency;
+    LARGE_INTEGER t1;
+
+    double delta;
+    QueryPerformanceFrequency(&frequency);
+    QueryPerformanceCounter(&t1);
+    double start = t1.QuadPart;
+
+    vec3 scale = {0.5, 0.5, 1.0};
+
     while (!glfwWindowShouldClose(window)) {
+        QueryPerformanceCounter(&t1);
+        delta = (t1.QuadPart - start) / frequency.QuadPart;
+        start = t1.QuadPart;
+
+        StepVerlet(delta, &p);
+        pos[0] = p.pos[0];
+        pos[1] = p.pos[1];
+
+        mat4 model = GLM_MAT4_IDENTITY_INIT;
+        glm_scale(model, scale);
+        glm_translate(model, pos);
+        glUniformMatrix4fv(modelLoc, 1, GL_FALSE, (float *) model);
+
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
