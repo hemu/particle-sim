@@ -7,6 +7,7 @@
 #include <windows.h>
 
 #define MAX_SHADER_SOURCE_SIZE 5000
+#define PARTICLE_COUNT 1
 
 void CheckGLErrors(char* label) {
     GLenum err;
@@ -31,7 +32,21 @@ char* LoadShader(const char* filepath, char* contents, size_t max_content_size) 
 }
 
 void StepVerlet(float delta, Particle *p) {
-    p->pos[0] += 2 * delta;
+    vec3 acc = {0.0, 0.0, 0.0};
+    vec3 prev_pos;
+    glm_vec3_copy(p->pos_prev, prev_pos);
+    glm_vec3_copy(p->pos, p->pos_prev);
+
+    // p->pos[0] = p->pos[0] * 2 - prev0 + acc * delta * delta;
+    // p->pos[1] = p->pos[1] * 2 - prev1 + acc * delta * delta;
+    glm_vec3_scale(p->pos, 2, p->pos);
+    glm_vec3_sub(p->pos, prev_pos, p->pos);
+    glm_vec3_scale(acc, delta*delta, acc);
+    glm_vec3_add(p->pos, acc, p->pos);
+}
+
+float rand_f() {
+    return (float)rand()/(float)(RAND_MAX/1.0);
 }
 
 int main() {
@@ -145,8 +160,15 @@ int main() {
     glUniform3f(iResolutionLoc, 640.0, 480.0, 1.0);
 
     // model pos
-    Particle p = {.pos = {0.0, 0.0}, .pos_prev = {0.0, 0.0}, .vel = {0.0, 0.0} };
-    vec3 pos = { 0.0, 0.0, 0.0 };
+    Particle ps[PARTICLE_COUNT];
+    for (int i=0; i<PARTICLE_COUNT; i++) {
+        float x = rand_f();
+        float y = rand_f();
+        float velx = rand_f() / 10.0;
+        float vely = rand_f() / 10.0;
+        Particle p = {.pos = {x, y, 0.0}, .pos_prev = {x-velx, y-vely, 0.0}, .vel = {velx, vely, 0.0} };
+        ps[i] = p;
+    }
 
     LARGE_INTEGER frequency;
     LARGE_INTEGER t1;
@@ -163,14 +185,13 @@ int main() {
         delta = (t1.QuadPart - start) / frequency.QuadPart;
         start = t1.QuadPart;
 
-        StepVerlet(delta, &p);
-        pos[0] = p.pos[0];
-        pos[1] = p.pos[1];
-
-        mat4 model = GLM_MAT4_IDENTITY_INIT;
-        glm_scale(model, scale);
-        glm_translate(model, pos);
-        glUniformMatrix4fv(modelLoc, 1, GL_FALSE, (float *) model);
+        for (int i=0; i<PARTICLE_COUNT; i++) {
+            StepVerlet(delta, &ps[i]);
+            mat4 model = GLM_MAT4_IDENTITY_INIT;
+            glm_scale(model, scale);
+            glm_translate(model, ps[i].pos);
+            glUniformMatrix4fv(modelLoc, 1, GL_FALSE, (float *) model);
+        }
 
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

@@ -1,5 +1,9 @@
+#include <cglm/cglm.h>
+
 typedef struct {
-    float pos[2];
-    float pos_prev[2];
-    float vel[2];
+    vec3 pos;
+    vec3 pos_prev;
+    vec3 vel;
 } Particle;
+
+Particle ParticleNew();
