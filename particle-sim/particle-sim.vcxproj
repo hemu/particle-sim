@@ -132,6 +132,8 @@
   <ItemGroup>
     <ClCompile Include="..\..\..\cpp\includes-and-libs\Src\glad.c" />
     <ClCompile Include="main.c" />
+    <ClCompile Include="particle.c" />
+    <ClCompile Include="scene.c" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

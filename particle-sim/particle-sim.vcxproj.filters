@@ -21,5 +21,11 @@
     <ClCompile Include="..\..\..\cpp\includes-and-libs\Src\glad.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="particle.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="scene.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

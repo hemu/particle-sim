@@ -7,7 +7,7 @@
 #include <windows.h>
 
 #define MAX_SHADER_SOURCE_SIZE 5000
-#define PARTICLE_COUNT 1
+#define PARTICLE_COUNT 100
 
 void CheckGLErrors(char* label) {
     GLenum err;
@@ -93,41 +93,6 @@ int main() {
     glAttachShader(program, frag_shader);
     glLinkProgram(program);
 
-    float vertices[12] = {
-        -0.5, 0.5, 0.0,
-        0.5, 0.5, 0.0,
-        0.5, -0.5, 0.0,
-        -0.5, -0.5, 0.0
-    };
-
-    unsigned int indices[6] = {
-        0, 1, 2,
-        0, 2, 3
-    };
-
-    const int vertex_count = sizeof(vertices) / sizeof(float);
-
-    GLuint VAO;
-    GLuint VBO;
-    GLuint EBO;
-
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
-    glGenBuffers(1, &EBO);
-
-    glBindVertexArray(VAO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), &vertices[0], GL_STATIC_DRAW);
-    
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), &indices[0], GL_STATIC_DRAW);
-
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*) 0);
-
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
-
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -140,7 +105,6 @@ int main() {
 
     mat4 view = GLM_MAT4_IDENTITY_INIT;
     mat4 projection = GLM_MAT4_IDENTITY_INIT;
-
 
     // view
     // TODO: extract out to Camera struct
@@ -159,14 +123,23 @@ int main() {
     glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, (float *) projection);
     glUniform3f(iResolutionLoc, 640.0, 480.0, 1.0);
 
+    vec3 scale = {0.5, 0.5, 1.0};
     // model pos
-    Particle ps[PARTICLE_COUNT];
+    Particle *ps[PARTICLE_COUNT];
     for (int i=0; i<PARTICLE_COUNT; i++) {
         float x = rand_f();
         float y = rand_f();
         float velx = rand_f() / 10.0;
         float vely = rand_f() / 10.0;
-        Particle p = {.pos = {x, y, 0.0}, .pos_prev = {x-velx, y-vely, 0.0}, .vel = {velx, vely, 0.0} };
+        // Particle p = {.pos = {x, y, 0.0}, .pos_prev = {x-velx, y-vely, 0.0}, .vel = {velx, vely, 0.0} };
+        Particle *p = ParticleNew();
+        p->pos[0] = x;
+        p->pos[1] = y;
+        p->pos_prev[0] = x-velx;
+        p->pos_prev[1] = y-vely;
+        p->vel[0] = velx;
+        p->vel[1] = vely;
+
         ps[i] = p;
     }
 
@@ -178,29 +151,32 @@ int main() {
     QueryPerformanceCounter(&t1);
     double start = t1.QuadPart;
 
-    vec3 scale = {0.5, 0.5, 1.0};
-
     while (!glfwWindowShouldClose(window)) {
         QueryPerformanceCounter(&t1);
         delta = (t1.QuadPart - start) / frequency.QuadPart;
         start = t1.QuadPart;
 
-        for (int i=0; i<PARTICLE_COUNT; i++) {
-            StepVerlet(delta, &ps[i]);
-            mat4 model = GLM_MAT4_IDENTITY_INIT;
-            glm_scale(model, scale);
-            glm_translate(model, ps[i].pos);
-            glUniformMatrix4fv(modelLoc, 1, GL_FALSE, (float *) model);
-        }
-
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        glBindVertexArray(VAO);
-        glDrawElements(GL_TRIANGLES, sizeof(indices)/sizeof(unsigned int), GL_UNSIGNED_INT, 0); 
+        Particle *p;
+        for (int i=0; i<PARTICLE_COUNT; i++) {
+            p = ps[i];
+            StepVerlet(delta, p);
+            glBindVertexArray(p->VAO);
+            mat4 model = GLM_MAT4_IDENTITY_INIT;
+            glm_translate(model, p->pos);
+            glm_scale(model, scale);
+            glUniformMatrix4fv(modelLoc, 1, GL_FALSE, (float *) model);
+            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0); 
+        }
 
         glfwSwapBuffers(window);
         glfwPollEvents();
+    }
+
+    for (int i=0; i<PARTICLE_COUNT; i++) {
+        free(ps[i]);
     }
 
     return 0;
