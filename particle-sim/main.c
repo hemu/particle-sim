@@ -168,39 +168,37 @@ int main() {
     vec3 scale = {0.5, 0.5, 1.0};
     // model pos
     Particle *ps[PARTICLE_COUNT];
-    // for (int i=0; i<PARTICLE_COUNT; i++) {
-    //     float x = rand_f();
-    //     float y = rand_f();
-    //     float velx = rand_f() / 10.0;
-    //     float vely = rand_f() / 10.0;
-    //     // Particle p = {.pos = {x, y, 0.0}, .pos_prev = {x-velx, y-vely, 0.0}, .vel = {velx, vely, 0.0} };
-    //     Particle *p = ParticleNew();
-    //     p->pos[0] = x;
-    //     p->pos[1] = y;
-    //     p->pos_prev[0] = x-velx;
-    //     p->pos_prev[1] = y-vely;
-    //     p->vel[0] = velx;
-    //     p->vel[1] = vely;
+    for (int i=0; i<PARTICLE_COUNT; i++) {
+        float x = rand_f();
+        float y = rand_f();
+        float velx = rand_f() / 5.0;
+        float vely = rand_f() / 5.0;
+        // Particle p = {.pos = {x, y, 0.0}, .pos_prev = {x-velx, y-vely, 0.0}, .vel = {velx, vely, 0.0} };
+        Particle *p = ParticleNew();
+        p->pos[0] = x;
+        p->pos[1] = y;
+        p->pos_prev[0] = x-velx;
+        p->pos_prev[1] = y-vely;
+        p->vel[0] = velx;
+        p->vel[1] = vely;
 
-    //     ps[i] = p;
-    // }
+        ps[i] = p;
+    }
 
     // --- TESTING ONLY ---
-    // Particle p = {.pos = {x, y, 0.0}, .pos_prev = {x-velx, y-vely, 0.0}, .vel = {velx, vely, 0.0} };
-    Particle *p = ParticleNew();
-    float velx = 0.0;
-    float vely = -0.1;
-    p->pos_prev[0] = p->pos[0]-velx;
-    p->pos_prev[1] = p->pos[1]-vely;
-    p->vel[0] = velx;
-    p->vel[1] = vely;
-    ps[0] = p;
-
-    Particle* boundary_particles[4];
-    CreateBoundaryParticles(boundary_particles);
-    for (int i=0; i<4; i++) {
-        ps[i+1] = boundary_particles[i];
-    }
+    // Particle *p = ParticleNew();
+    // float velx = 0.2;
+    // float vely = 0.1;
+    // p->pos_prev[0] = p->pos[0]-velx;
+    // p->pos_prev[1] = p->pos[1]-vely;
+    // p->vel[0] = velx;
+    // p->vel[1] = vely;
+    // ps[0] = p;
+    // Particle* boundary_particles[4];
+    // CreateBoundaryParticles(boundary_particles);
+    // for (int i=0; i<4; i++) {
+    //     ps[i+1] = boundary_particles[i];
+    // }
 
     LARGE_INTEGER frequency;
     LARGE_INTEGER t1;
