@@ -133,7 +133,16 @@
     <ClCompile Include="..\..\..\cpp\includes-and-libs\Src\glad.c" />
     <ClCompile Include="main.c" />
     <ClCompile Include="particle.c" />
+    <ClCompile Include="pmath.c" />
     <ClCompile Include="scene.c" />
+    <ClCompile Include="types.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="const.h" />
+    <ClInclude Include="particle.h" />
+    <ClInclude Include="pmath.h" />
+    <ClInclude Include="scene.h" />
+    <ClInclude Include="types.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
