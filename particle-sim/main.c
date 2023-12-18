@@ -7,9 +7,12 @@
 #include <GLFW/glfw3.h>
 
 #include "const.h"
+#include "line.h"
 #include "particle.h"
 #include "pmath.h"
 #include "types.h"
+
+#define LINE_COUNT 4
 
 void CheckGLErrors(char* label) {
     GLenum err;
@@ -106,9 +109,11 @@ int main() {
 
     // --- Load shaders ---
     char vert_shader_src[MAX_SHADER_SOURCE_SIZE];
-    char frag_shader_src[MAX_SHADER_SOURCE_SIZE];
+    char particle_frag_shader_src[MAX_SHADER_SOURCE_SIZE];
+    char line_frag_shader_src[MAX_SHADER_SOURCE_SIZE];
     LoadShader("vert.glsl", vert_shader_src, MAX_SHADER_SOURCE_SIZE);
-    LoadShader("frag2.glsl", frag_shader_src, MAX_SHADER_SOURCE_SIZE);
+    LoadShader("particle_rect_frag.glsl", particle_frag_shader_src, MAX_SHADER_SOURCE_SIZE);
+    // LoadShader("line_frag.glsl", line_frag_shader_src, MAX_SHADER_SOURCE_SIZE);
 
     GLuint vert_shader = glCreateShader(GL_VERTEX_SHADER);
     if (!vert_shader) {
@@ -125,7 +130,7 @@ int main() {
     if (!frag_shader) {
         fprintf(stderr, "Failed to create vertex shader\n");
     }
-    char* frag_p = &frag_shader_src[0];
+    char* frag_p = &particle_frag_shader_src[0];
     glShaderSource(frag_shader, 1, &frag_p, NULL);
     glCompileShader(frag_shader);
     CheckGLErrors("Compiled frag shader");
@@ -166,6 +171,22 @@ int main() {
     glUniform3f(iResolutionLoc, 640.0, 480.0, 1.0);
 
     vec3 scale = {0.5, 0.5, 1.0};
+    
+    Line *lines[LINE_COUNT];
+    vec3 line_top_s = {-BOUND_X, BOUND_Y, 0.0f};
+    vec3 line_top_e = {BOUND_X, BOUND_Y, 0.0f};
+    vec3 line_bot_s = {-BOUND_X, -BOUND_Y, 0.0f};
+    vec3 line_bot_e = {BOUND_X, -BOUND_Y, 0.0f};
+    vec3 line_right_s = {BOUND_X, BOUND_Y, 0.0f};
+    vec3 line_right_e = {BOUND_X, -BOUND_Y, 0.0f};
+    vec3 line_left_s = {-BOUND_X, BOUND_Y, 0.0f};
+    vec3 line_left_e = {-BOUND_X, -BOUND_Y, 0.0f};
+
+    lines[0] = NewLine(line_top_s, line_top_e);
+    lines[1] = NewLine(line_bot_s, line_bot_e);
+    lines[2] = NewLine(line_right_s, line_right_e);
+    lines[3] = NewLine(line_left_s, line_left_e);
+
     // model pos
     Particle *ps[PARTICLE_COUNT];
     for (int i=0; i<PARTICLE_COUNT; i++) {
@@ -217,6 +238,7 @@ int main() {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         Particle *p;
+        Line *l;
         for (int i=0; i<PARTICLE_COUNT; i++) {
             p = ps[i];
             StepVerlet(delta, p);
@@ -226,6 +248,14 @@ int main() {
             glm_scale(model, scale);
             glUniformMatrix4fv(modelLoc, 1, GL_FALSE, (float *) model);
             glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0); 
+        }
+
+        for (int i=0; i<LINE_COUNT; i++) {
+            l = lines[i];
+            glBindVertexArray(l->VAO);
+            mat4 model = GLM_MAT4_IDENTITY_INIT;
+            glUniformMatrix4fv(modelLoc, 1, GL_FALSE, (float *) model);
+            glDrawArrays(GL_LINES, 0, 2);
         }
 
         glfwSwapBuffers(window);

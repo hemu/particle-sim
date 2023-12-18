@@ -1,6 +1,7 @@
-#include "particle.h"
-#include <glad/glad.h>
 #include <cglm/cglm.h>
+#include <glad/glad.h>
+
+#include "particle.h"
 
 Particle* ParticleNew() {
     float vertices[12] = {
@@ -43,17 +44,17 @@ Particle* ParticleNew() {
         return NULL;
     }
 
-    p->pos[0] = 0.0;
-    p->pos[1] = 0.0;
-    p->pos[2] = 0.0;
+    p->pos[0] = 0.0f;
+    p->pos[1] = 0.0f;
+    p->pos[2] = 0.0f;
 
-    p->pos_prev[0] = 0.0;
-    p->pos_prev[1] = 0.0;
-    p->pos_prev[2] = 0.0;
+    p->pos_prev[0] = 0.0f;
+    p->pos_prev[1] = 0.0f;
+    p->pos_prev[2] = 0.0f;
 
-    p->vel[0] = 0.0;
-    p->vel[1] = 0.0;
-    p->vel[2] = 0.0;
+    p->vel[0] = 0.0f;
+    p->vel[1] = 0.0f;
+    p->vel[2] = 0.0f;
 
     p->VAO = VAO;
 

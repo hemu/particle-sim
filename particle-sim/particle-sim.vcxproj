@@ -131,6 +131,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\cpp\includes-and-libs\Src\glad.c" />
+    <ClCompile Include="line.c" />
     <ClCompile Include="main.c" />
     <ClCompile Include="particle.c" />
     <ClCompile Include="pmath.c" />
@@ -139,6 +140,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="const.h" />
+    <ClInclude Include="line.h" />
     <ClInclude Include="particle.h" />
     <ClInclude Include="pmath.h" />
     <ClInclude Include="scene.h" />

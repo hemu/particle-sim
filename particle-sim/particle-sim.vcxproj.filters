@@ -33,6 +33,9 @@
     <ClCompile Include="types.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="line.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="const.h">
@@ -48,6 +51,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="types.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="line.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
